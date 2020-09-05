@@ -11,7 +11,7 @@ struct Card{
 	char type;
 	char color;
 	char img;
-	char label;
+	char * label;
 };
 
 typedef struct Element Element;
@@ -37,13 +37,14 @@ void createColumn(Element**,Element *);
 Element* newNode(Card );
 Card newCard(int , char );
 int isEmpty(Element* );
-//void push(Element**, Element *);
 void insert(Element** , Card );
 Card pop(Element** );
 int peek(Element* );
 void displayCard(Card );
 void display(Element* );
 Element * generateDeck();
+void displayVert(Element **);
+void displayHeader(Element **, Element**);
 
 int main(){
 	srand(time(0));
@@ -52,37 +53,53 @@ int main(){
     
     //declaration
     Element *zone1[8]={NULL}, *zone2[4]={NULL}, *zone3[4]={NULL}, *deck = NULL;
-    int moves=0;
-	char Columns[8]= {'Q','W','E','R','T','Y','U','I'};
-	deck = generateDeck();
+    int moves=0, i;
+	char c1,c2,Columns[]= {'Q','W','E','R','T','Y','U','I'}, choices[]={'A','B','C','D','F','L','Z'};
 	
+	deck = generateDeck();	
 	
-	int i;
-		
+	displayHeader(zone2, zone3);
     
-    printf("\n  A \t  B \t  C \t  D\t \t  %c\t  %c\t  %c\t  %c\n", 3, 4, 5, 6);
-
-    for (i = 0;i < 4;i++) printf("[   ]\t");
-    printf("    \t");
-	for (i = 0;i < 4;i++) printf("[   ]\t");
-	printf("\n\n\n");
-	
-	for (i = 0;i < 4;i++) printf("  %c \t", Columns[i]);
 	printf("\t");
+	for (i = 0;i < 4;i++) printf("  %c \t", Columns[i]);
 	for (i=4;i < 8;i++) printf("  %c \t", Columns[i]);
 	printf("\n\n");
 	
 	createColumn(zone1,deck);
 	
+	displayVert(zone1);
 	
-	//this horizontal display we need vertical display
-	for(i=0;i<8;i++){
-		display(zone1[i]);
-		printf("\n\n");		
-	}
+	printf("\t Choices: Q-W-E-R-T-Y-U-I - A-B-C-D - Z(Zone3) - F(Fin) - L(New) ");
+	printf("\n\n");
+	byte flags=0;
+	//doesnt work well
+	
+//	do{
+//		printf("Choose ur card position : ");
+//		c1 = getchar();
+//		if(strstr(Columns,c1+'\0') || strstr(choices,c1+'\0')){
+//			printf("valid\n");
+//			flags=1;
+//		}
+////		else{
+////			printf("please choose again\n");
+////		}
+////		getchar();			
+//	}while(flags==0);
+//	
+//	printf("\n\n");
+//	getchar();
+//	printf("Choose ur card destination : ");
+//	c2 = getchar();
+	
+//	for(i=0;i<8;i++){
+//		display(zone1[i]);
+//		printf("\n\n");		
+//	}
 
 	// we need code for moving cards
 
+	
 	
 	return 0;
 }
@@ -115,11 +132,12 @@ Card newCard(int value, char type){
 	c.value = value;
 	c.type = type;
 	if(c.value<10)
-		c.label = c.value;
+		c.label = c.value + '0';
 	else{
-		if(c.value==10) c.label=='J';
-		if(c.value==11) c.label=='Q';
-		if(c.value==12) c.label=='K';
+		if(c.value==10) c.label="10";
+		if(c.value==11) c.label="J";
+		if(c.value==12) c.label="Q";
+		if(c.value==13) c.label="K";
 	}
 	switch(type){
 		case 's': 
@@ -127,7 +145,7 @@ Card newCard(int value, char type){
 			c.color = 'b';
 			break;
 		case 'c':
-			c.img = 4;
+			c.img = 6;
 			c.color = 'b';
 			break;
 		case 'h': 
@@ -135,7 +153,7 @@ Card newCard(int value, char type){
 			c.color = 'r';
 			break;
 		case 'd':
-			c.img = 6;
+			c.img = 4;
 			c.color = 'r';
 			break;
 	}
@@ -174,18 +192,6 @@ Element *generateDeck(){
 	return pile;
 }
 
-//void push(Element ** pile,Element * root){
-//	Element * tmp = *pile;
-//	if(tmp->next==NULL){
-//		tmp->next=root;
-//	}
-//	else{
-//		root->next = tmp->next;
-//		tmp->next = root;
-//	}
-//	tmp->size++;
-//}
-
 void insert(Element** root, Card data) { 
     Element* stack = newNode(data); 
     stack->next = *root; 
@@ -193,6 +199,24 @@ void insert(Element** root, Card data) {
 //    printf("%d pushed to stack\n", data); 
 } 
   
+void displayVert(Element **e){
+	int i,flag=1;
+	while(flag){
+		flag=0;
+		printf("\t");
+		for(i=0;i<8;i++){
+			if(e[i]!=NULL){
+				displayCard((e[i])->data);
+				e[i]=e[i]->next;
+				flag=1;
+			}
+			else{
+				printf("\t");
+			}
+		}
+		printf("\n\n");
+	}
+}
   
 Card pop(Element** root) { 
     if (isEmpty(*root)){
@@ -222,7 +246,34 @@ void displayCard(Card c){
 		color(12, 15);
 	else
 		color(0, 15);		
-	printf("[%d %c]\t", c.label, c.img);
+	if(c.value<10)
+		printf("[%c %c]\t", c.label, c.img);
+	else
+		printf("[%s %c]\t", c.label, c.img);
+}
+
+void displayHeader(Element ** z2, Element** z3){
+	int i;
+    printf("\n  A \t  B \t  C \t  D\t \t  %c\t  %c\t  %c\t  %c\n", 3, 4, 5, 6);
+
+    for (i = 0;i < 4;i++) {
+    	if(z2[i]!=NULL){
+    		displayCard(z2[i]->data);
+		}
+		else{
+			printf("[   ]\t");    	
+		}
+	}
+   	printf("    \t");
+	for (i = 0;i < 4;i++) {
+    	if(z3[i]!=NULL){
+    		displayCard(z3[i]->data);
+		}
+		else{
+			printf("[   ]\t");    	
+		}
+	}
+	printf("\n\n\n");	
 }
 
 void display(Element* root){
