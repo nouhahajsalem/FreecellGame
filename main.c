@@ -3,6 +3,7 @@
 #include<time.h>
 #include<windows.h>
 #include<string.h>
+#include<conio.h>
 
 typedef struct Card Card;
 
@@ -21,30 +22,29 @@ struct Element{
 	Element *next;
 };
 
-typedef struct PileOfCard PileOfCard;
-
-struct PileOfCard{
-	int size;
-	PileOfCard * top;
-};
-
 void color(int t, int f){
     HANDLE H = GetStdHandle(STD_OUTPUT_HANDLE);
     SetConsoleTextAttribute(H, f * 16 + t);
 }
 
-void createColumn(Element**,Element *);
 Element* newNode(Card );
 Card newCard(int , char );
 int isEmpty(Element* );
-void insert(Element** , Card );
-Card pop(Element** );
-int peek(Element* );
-void displayCard(Card );
-void display(Element* );
+void insert(Element**, Card);
+Card pop(Element**);
+int peek(Element*);
+void displayCard(Card);
+void display(Element*);
 Element * generateDeck();
 void displayVert(Element **);
 void displayHeader(Element **, Element**);
+void createColumn(Element**,Element *);
+void moveCard(Element **, Element **);
+int moveCardRest(Element **, Element **);
+Element * getHead(Element **);
+int validZone1(char c1, char * col);
+int validZone2(char c1, char * col);
+int validZone3(char c1, char * col);
 
 int main(){
 	srand(time(0));
@@ -53,62 +53,118 @@ int main(){
     
     //declaration
     Element *zone1[8]={NULL}, *zone2[4]={NULL}, *zone3[4]={NULL}, *deck = NULL;
-    int moves=0, i;
-	char c1,c2,Columns[]= {'Q','W','E','R','T','Y','U','I'}, choices[]={'A','B','C','D','F','L','Z'};
+    int moves=0, i,c1Index,c2Index,c1zone,c2zone;
+	char c1,c2,Columns[]= {'Q','W','E','R','T','Y','U','I'}, choices[]={'A','B','C','D','Z','L','F'};
 	
-	deck = generateDeck();	
-	
-	displayHeader(zone2, zone3);
-    
-	printf("\t");
-	for (i = 0;i < 4;i++) printf("  %c \t", Columns[i]);
-	for (i=4;i < 8;i++) printf("  %c \t", Columns[i]);
-	printf("\n\n");
-	
+	//
+	deck = generateDeck();
 	createColumn(zone1,deck);
-	
-	displayVert(zone1);
-	
-	printf("\t Choices: Q-W-E-R-T-Y-U-I - A-B-C-D - Z(Zone3) - F(Fin) - L(New) ");
-	printf("\n\n");
-	byte flags=0;
-	//doesnt work well
-	
-//	do{
-//		printf("Choose ur card position : ");
-//		c1 = getchar();
-//		if(strstr(Columns,c1+'\0') || strstr(choices,c1+'\0')){
-//			printf("valid\n");
-//			flags=1;
-//		}
-////		else{
-////			printf("please choose again\n");
-////		}
-////		getchar();			
-//	}while(flags==0);
-//	
-//	printf("\n\n");
-//	getchar();
-//	printf("Choose ur card destination : ");
-//	c2 = getchar();
-	
-//	for(i=0;i<8;i++){
-//		display(zone1[i]);
-//		printf("\n\n");		
-//	}
 
-	// we need code for moving cards
+	do{
+		color(15, 10);
+		displayHeader(zone2, zone3);
+    	color(15, 10);
+		printf("\t");
+		for (i = 0;i < 4;i++) printf("  %c \t", Columns[i]);
+		for (i=4;i < 8;i++) printf("  %c \t", Columns[i]);
+		printf("\n\n");	
+//		display(zone1[1]);
+		printf("\n\n");
+		
+	//	displayCard((getHead(zone1[1]))->data);
+	//	insert(&zone1[1],newCard(1,'h'));
+		
+	//	moveCard(zone1,zone3);
+			
+	//	displayVert(zone1);
+		
+		color(15, 10);
+		printf("\t Choices: Q-W-E-R-T-Y-U-I - A-B-C-D - Z(Zone3) - F(Fin) - L(New) ");
+		printf("\n\n");
+		byte flags=0;
+		//doesnt work well
+		
+		do{
+			c1zone=0;
+			color(15, 10);
+			printf("Choose ur card position : ");
+			c1 = getch();
+			printf("%c",c1);
+			if(validZone1(c1,Columns)!=-1){
+				c1zone=1;
+				c1Index = validZone1(c1,Columns);
+				flags=1;
+			}
+			else if(validZone2(c1,choices)!=-1 || validZone2(c1,choices)!=4){
+				c1Index = validZone2(c1,Columns);
+				if(c1Index<4)			
+					c1zone=2;
+				flags=1;
+			}
+			else{
+				printf("\nplease choose again\n");
+			}	
+		}while(flags==0);
+		if(c1=='F')
+			break;
+		do{
+			c2zone=0;
+			printf("\nChoose ur card destination : ");
+			c2 = getch();
+			printf("%c",c2);
+			if(validZone1(c2,Columns)!=-1){
+				c2zone=1;
+				c2Index = validZone1(c2,Columns);
+				flags=1;
+			}
+			else if(validZone2(c2,choices)!=-1){
+				printf("\nyour  : %d \n", validZone2(c2,choices));
+				c2Index = validZone2(c2,choices);
+				if(c2Index<4)			
+					c2zone=2;
+				if(c2Index==4)
+					c2zone=3;
+				flags=1;
+			}
+			else{
+				printf("\n please choose again\n");
+			}
+		}while(flags==0);
+		//printf("\nyour c1 : %d c2 : %d\n", c1zone, c2zone);
+		
+		//pls refactor this
+		
+		if(c1zone==1 && c2zone==1){
+			moveCard(&zone1[c1Index],&zone1[c2Index]);
+			printf("card moved \n");														
+		}
+		else if(c1zone==1 && c2zone==2)
+			moveCard(&zone1[c1Index],&zone2[c2Index]);
+		else if(c1zone==1 && c2zone==3){
+			if(moveCardRest(&zone1[c1Index],zone3)==1)
+				moves++;
+			else
+				printf("invalid move\n");
+						
+		}
+		else if(c1zone==2 && c2zone==1)
+			moveCard(&zone2[c1Index],&zone1[c2Index]);
+		else if(c1zone==2 && c2zone==2)
+			moveCard(&zone2[c1Index],&zone2[c2Index]);
+		else if(c1zone==2 && c2zone==3){
+			if(moveCardRest(&zone2[c1Index],zone3)==1)
+				moves++;
+			else
+				printf("invalid move\n");
+		}
+		
+//		system("cls");
+	}while(c1!='F');
 
+	printf("your moves : %d\n", moves);
 	
 	
 	return 0;
-}
-
-PileOfCard * newPile(){
-	PileOfCard * pile = (PileOfCard*)malloc(sizeof(PileOfCard));
-	pile->size=0;
-	pile->top=NULL;
-	return pile;
 }
 
 Element* newNode(Card data){
@@ -195,12 +251,23 @@ Element *generateDeck(){
 void insert(Element** root, Card data) { 
     Element* stack = newNode(data); 
     stack->next = *root; 
-    *root = stack; 
-//    printf("%d pushed to stack\n", data); 
+    *root = stack;
 } 
   
 void displayVert(Element **e){
 	int i,flag=1;
+	Element *copy[8];
+	
+	for(i=0;i<8;i++){
+		
+	}
+
+//	printf("\n\n");
+//	display(e[0]);
+//	printf("\n\n");
+//	display(e[1]);
+//	printf("\n\n");
+
 	while(flag){
 		flag=0;
 		printf("\t");
@@ -216,6 +283,10 @@ void displayVert(Element **e){
 		}
 		printf("\n\n");
 	}
+	
+	printf("\n\n");
+	display(e[0]);
+
 }
   
 Card pop(Element** root) { 
@@ -247,22 +318,25 @@ void displayCard(Card c){
 	else
 		color(0, 15);		
 	if(c.value<10)
-		printf("[%c %c]\t", c.label, c.img);
+		printf("%c     %c\t", c.label, c.img);
 	else
-		printf("[%s %c]\t", c.label, c.img);
+		printf("%s    %c\t", c.label, c.img);
 }
 
 void displayHeader(Element ** z2, Element** z3){
 	int i;
-    printf("\n  A \t  B \t  C \t  D\t \t  %c\t  %c\t  %c\t  %c\n", 3, 4, 5, 6);
-
+	color(15, 10);
+	printf("\n  A \t  B \t  C \t  D\t \t  %c\t  %c\t  %c\t  %c\n", 3, 4, 5, 6);
+	color(15, 10);
+    
     for (i = 0;i < 4;i++) {
     	if(z2[i]!=NULL){
     		displayCard(z2[i]->data);
 		}
 		else{
-			printf("[   ]\t");    	
+			printf("   \t");    	
 		}
+		color(15, 10);
 	}
    	printf("    \t");
 	for (i = 0;i < 4;i++) {
@@ -272,6 +346,7 @@ void displayHeader(Element ** z2, Element** z3){
 		else{
 			printf("[   ]\t");    	
 		}
+		color(15, 10);
 	}
 	printf("\n\n\n");	
 }
@@ -290,6 +365,15 @@ void display(Element* root){
 	}while(!isEmpty(root));
 }
 
+Element * getHead(Element ** elmnt){
+	Element * e = *elmnt;
+	if(e==NULL)
+		return NULL;
+	while(e->next==NULL)
+		e=e->next;
+	return e;
+}
+
 void createColumn(Element** c,Element * d){
 	int i,j;
 	for(i=0;i<4;i++){
@@ -306,3 +390,104 @@ void createColumn(Element** c,Element * d){
 	}
 }
 
+void moveCard(Element ** s, Element ** d){
+	
+//	printf("ddssd\n");
+//	displayCard((*s)->data);
+	Card c = pop(s);	
+	printf("\n \n");
+	displayCard(c);
+	color(15, 10);
+	printf("\n\n");
+	insert(d,c);
+}
+
+int moveCardRest(Element ** s, Element ** d){
+	printf("ddssd\n");
+//	displayCard((*s)->data);
+	Card c = pop(s);
+	printf("\n \n");
+	displayCard(c);
+	if(c.type=='h'){
+		if(d[0]!=NULL){
+			if(d[0]->data.value==c.value-1){
+				insert(&d[0],c);
+				return 1;
+			}
+				
+		}
+		else if(c.value==1){
+			insert(&d[0],c);
+			return 1;		
+		}		
+	}
+	else if(c.type=='d'){
+		if(d[1]!=NULL){
+			if(d[1]->data.value==c.value-1){
+				insert(&d[1],c);
+				return 1;				
+			}
+		}
+		else if(c.value==1){
+			insert(&d[1],c);
+			return 1;
+		}		
+	}	
+	else if(c.type=='c'){
+		if(d[1]!=NULL){
+			if(d[1]->data.value==c.value-1){
+				insert(&d[1],c);
+				return 1;				
+			}
+		}
+		else if(c.value==1){
+			insert(&d[1],c);
+			return 1;
+		}		
+	}
+	else if(c.type=='s'){
+		if(d[3]!=NULL){
+			if(d[3]->data.value==c.value-1){
+				insert(&d[3],c);
+				return 1;				
+			}
+		}
+		else if(c.value==1){
+			insert(&d[3],c);
+			return 1;
+		}		
+		
+	}
+
+	
+	printf("\n\n");
+//	insert(&d[1],c);
+	return 0;
+}
+
+int validZone1(char c, char * t){
+	int i;
+	for(i=0;i<8;i++){
+		if(t[i]==c)
+			return i;
+	}
+	return -1;
+}
+
+int validZone2(char c, char * t){
+	int i;
+	for(i=0;i<7;i++){
+		if(t[i]==c)
+			return i;
+	}
+	return -1;
+}
+
+int validZone3(char c, char * t){
+	int i;
+	for(i=0;i<4;i++){
+		if(t[i]==c)
+			return i;
+	}
+	return -1;
+}
