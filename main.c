@@ -34,7 +34,7 @@ void insert(Element**, Card);
 Card pop(Element**);
 int peek(Element*);
 void displayCard(Card);
-void display(Element*);
+void display(Element**, char *);
 Element * generateDeck();
 void displayVert(Element **);
 void displayHeader(Element **, Element**);
@@ -53,7 +53,7 @@ int main(){
     
     //declaration
     Element *zone1[8]={NULL}, *zone2[4]={NULL}, *zone3[4]={NULL}, *deck = NULL;
-    int moves=0, i,c1Index,c2Index,c1zone,c2zone;
+    int moves=0, i,c1Index,c2Index,c1zone,c2zone,flags;
 	char c1,c2,Columns[]= {'Q','W','E','R','T','Y','U','I'}, choices[]={'A','B','C','D','Z','L','F'};
 	
 	//
@@ -64,25 +64,11 @@ int main(){
 		color(15, 10);
 		displayHeader(zone2, zone3);
     	color(15, 10);
-		printf("\t");
-		for (i = 0;i < 4;i++) printf("  %c \t", Columns[i]);
-		for (i=4;i < 8;i++) printf("  %c \t", Columns[i]);
-		printf("\n\n");	
-//		display(zone1[1]);
-		printf("\n\n");
-		
-	//	displayCard((getHead(zone1[1]))->data);
-	//	insert(&zone1[1],newCard(1,'h'));
-		
-	//	moveCard(zone1,zone3);
-			
-	//	displayVert(zone1);
-		
+		display(zone1,Columns);
+						
 		color(15, 10);
-		printf("\t Choices: Q-W-E-R-T-Y-U-I - A-B-C-D - Z(Zone3) - F(Fin) - L(New) ");
-		printf("\n\n");
-		byte flags=0;
-		//doesnt work well
+		printf("\t Choices: Q-W-E-R-T-Y-U-I - A-B-C-D - Z(Zone3) - F(Fin) - L(New) \n\n");
+		flags=0;
 		
 		do{
 			c1zone=0;
@@ -130,9 +116,6 @@ int main(){
 				printf("\n please choose again\n");
 			}
 		}while(flags==0);
-		//printf("\nyour c1 : %d c2 : %d\n", c1zone, c2zone);
-		
-		//pls refactor this
 		
 		if(c1zone==1 && c2zone==1){
 			moveCard(&zone1[c1Index],&zone1[c2Index]);
@@ -158,7 +141,7 @@ int main(){
 				printf("invalid move\n");
 		}
 		
-//		system("cls");
+		system("cls");
 	}while(c1!='F');
 
 	printf("your moves : %d\n", moves);
@@ -285,7 +268,7 @@ void displayVert(Element **e){
 	}
 	
 	printf("\n\n");
-	display(e[0]);
+//	display(e[0]);
 
 }
   
@@ -351,18 +334,31 @@ void displayHeader(Element ** z2, Element** z3){
 	printf("\n\n\n");	
 }
 
-void display(Element* root){
-	
+void display(Element ** root, char * t){
+	int i;
 	Card c;
-	if(isEmpty(root)){
-		printf("is empty!!!\n");
-		return;		
+	Element * e;
+	for(i=0;i<8;i++){
+		e = root[i];
+		printf("   %c  \t", t[i]);
+
+		if(isEmpty(e)){
+			printf("is empty!!!\n");
+			return;		
+		}
+		else{
+			do{
+				c=e->data;
+				displayCard(c);
+				e=e->next;
+			}while(!isEmpty(e));					
+		}
+		color(15, 10);
+		printf("\n\n");
+
 	}
-	do{
-		c=root->data;
-		displayCard(c);
-		root=root->next;
-	}while(!isEmpty(root));
+	
+
 }
 
 Element * getHead(Element ** elmnt){
@@ -403,7 +399,7 @@ void moveCard(Element ** s, Element ** d){
 }
 
 int moveCardRest(Element ** s, Element ** d){
-	printf("ddssd\n");
+//	printf("ddssd\n");
 //	displayCard((*s)->data);
 	Card c = pop(s);
 	printf("\n \n");
@@ -434,18 +430,6 @@ int moveCardRest(Element ** s, Element ** d){
 		}		
 	}	
 	else if(c.type=='c'){
-		if(d[1]!=NULL){
-			if(d[1]->data.value==c.value-1){
-				insert(&d[1],c);
-				return 1;				
-			}
-		}
-		else if(c.value==1){
-			insert(&d[1],c);
-			return 1;
-		}		
-	}
-	else if(c.type=='s'){
 		if(d[3]!=NULL){
 			if(d[3]->data.value==c.value-1){
 				insert(&d[3],c);
@@ -454,6 +438,18 @@ int moveCardRest(Element ** s, Element ** d){
 		}
 		else if(c.value==1){
 			insert(&d[3],c);
+			return 1;
+		}		
+	}
+	else if(c.type=='s'){
+		if(d[2]!=NULL){
+			if(d[2]->data.value==c.value-1){
+				insert(&d[2],c);
+				return 1;				
+			}
+		}
+		else if(c.value==1){
+			insert(&d[2],c);
 			return 1;
 		}		
 		
