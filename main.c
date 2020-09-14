@@ -37,7 +37,7 @@ Card peek(Element*);
 void displayCard(Card);
 void display(Element**, char *);
 Element * generateDeck();
-void displayVert(Element **);
+void displayVertical(Element **, char * );
 void displayHeader(Element **, Element**);
 void createColumn(Element**,Element *);
 void moveCard(Element **, Element **);
@@ -70,7 +70,8 @@ int main(){
 		color(15, 10);//maintaining color 
 		displayHeader(zone2, zone3);//displaying zone 2 and zone 3
     	color(15, 10);
-		display(zone1,Columns);//displaying zone 1
+		// display(zone1,Columns);//displaying horizontally zone 1
+		displayVertical(zone1, Columns); // displaying vertucally zone 1
 		color(15, 10);
 		
 		//displaying possible choices
@@ -226,11 +227,11 @@ Element *generateDeck(){
     	randNum = rand()%remaining;//generate random number
     	cpt=0;
     	for(i=0;i<52;i++){
-    		if(flags[i]==0){
+    		if(flags[i]==0){//checking if not assigned
     			if(randNum == cpt){
     				insert(&deck, Pack[i]);//insertion of card in the linked list
-					flags[i]=1;
-    				remaining--;
+					flags[i]=1;//value assigned to a card so no need to check it again in iteration
+    				remaining--;//decrementing remaining cards to shuffle
 					break;    				
 				}						
 				cpt++;
@@ -246,19 +247,17 @@ void insert(Element** root, Card data) {
     *root = stack;
 } 
   
-void displayVert(Element **e){
+void displayVertical(Element **copy,char * t){
 	int i,flag=1;
-	Element *copy[8];
+	Element *e[8];
+	printf("\t");
 	
 	for(i=0;i<8;i++){
-		
+		e[i]=copy[i];
+		color(15, 10);
+		printf("   %c\t", t[i]);
 	}
-
-//	printf("\n\n");
-//	display(e[0]);
-//	printf("\n\n");
-//	display(e[1]);
-//	printf("\n\n");
+	printf("\n\n");
 
 	while(flag){
 		flag=0;
@@ -338,7 +337,7 @@ void displayHeader(Element ** z2, Element** z3){
     		displayCard(z3[i]->data);
 		}
 		else{
-			printf("[   ]\t");    	
+			printf("     \t");    	
 		}
 		color(15, 10);
 	}
@@ -403,8 +402,8 @@ void createColumn(Element** c,Element * d){
 }
 
 void moveCard(Element ** s, Element ** d){
-	Card c = peek(*s);
-	pop(s);	
+	Card c = peek(*s);//retrieving the value last inserted card in stack
+	pop(s);	//delete last element from stack
 	printf("\n \n");
 	displayCard(c);
 	color(15, 10);
@@ -419,15 +418,15 @@ int moveCardRest(Element ** s, Element ** d){//moving card to zone 3
 	printf("\n \n");
 	//displayCard(c);
 	if(c.type=='h'){
-		if(d[0]!=NULL){
+		if(d[0]!=NULL){//check if the zone is empty
 			if(d[0]->data.value==c.value-1){// check if the moved card is following the head of zone 3
 				insert(&d[0],c);
 				return 1;
 			}
 				
 		}
-		else if(c.value==1){// check if the zone is empty
-			insert(&d[0],c);
+		else if(c.value==1){// if the card is having value 1 ('A')
+			insert(&d[0],c);// push card having value as 1 in the stack
 			return 1;		
 		}		
 	}
@@ -469,7 +468,7 @@ int moveCardRest(Element ** s, Element ** d){//moving card to zone 3
 		
 	}
 
-	
+	color(15, 10);	
 	printf("\n\n");
 //	insert(&d[1],c);
 	return 0;
